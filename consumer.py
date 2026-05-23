@@ -66,6 +66,7 @@ def _on_message(channel, method, properties, body: bytes, db: DB) -> None:
 def start(db: DB) -> None:
     """Blocking consumer loop with reconnect-on-failure. Runs forever."""
     while True:
+        connection = None
         try:
             connection = _setup_connection()
             channel = connection.channel()
@@ -81,8 +82,13 @@ def start(db: DB) -> None:
         except pika.exceptions.AMQPConnectionError:
             set_consumer_status(False)
             log.error("Lost RabbitMQ connection. Retrying in 5s...")
-            time.sleep(5)
         except Exception as exc:
             set_consumer_status(False)
             log.error("Unexpected error: %s. Retrying in 5s...", exc)
+        finally:
+            if connection is not None:
+                try:
+                    connection.close()
+                except Exception:
+                    pass
             time.sleep(5)

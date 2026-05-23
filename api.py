@@ -1,7 +1,7 @@
+import metrics  # noqa: F401 - imported to register prometheus metrics
 from fastapi import FastAPI
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from starlette.responses import Response
-import metrics  # noqa: F401 - imported to register prometheus metrics
 
 app = FastAPI(title="groceror-users")
 
@@ -12,5 +12,5 @@ def health():
 
 
 @app.get("/metrics")
-def metrics():
+def get_metrics():
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
