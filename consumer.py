@@ -3,6 +3,7 @@ import logging
 import time
 
 import pika
+from pydantic import ValidationError
 
 import config
 from db import DB
@@ -54,6 +55,9 @@ def _on_message(channel, method, properties, body: bytes, db: DB) -> None:
     try:
         process_message(raw, db)
         channel.basic_ack(delivery_tag=method.delivery_tag)
+    except (ValidationError, ValueError) as exc:
+        log.error("Validation/schema error, routing directly to DLQ: %s", exc)
+        channel.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
     except Exception as exc:
         if method.redelivered:
             log.error("Redelivered message still failing, routing to DLQ: %s", exc)

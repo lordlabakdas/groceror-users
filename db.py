@@ -14,6 +14,8 @@ class DB:
     def __init__(self):
         self.client = MongoClient(config.MONGO_URI)
         self.db = self.client["users"]
+        self.collection = self.db["user_events"]
+        self.collection.create_index([("user_id", 1), ("event", 1)])
 
     def insert_event(self, event_type: str, user_id: str, raw_payload: dict) -> None:
         collection = self.db["user_events"]
