@@ -1,0 +1,64 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {}}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "single"}},
+      "targets": [{"datasource": {"type": "prometheus"}, "expr": "rate(groceror_users_events_total{event_type=\"user_registered\"}[5m])", "legendFormat": "registrations/min", "refId": "A"}],
+      "title": "Registrations/min",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "id": 2,
+      "options": {"colorMode": "value", "graphMode": "area", "reduceOptions": {"calcs": ["lastNotNull"]}},
+      "targets": [{"datasource": {"type": "prometheus"}, "expr": "groceror_users_events_total{event_type=\"user_registered\"}", "legendFormat": "Total", "refId": "A"}],
+      "title": "Total Registrations",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {}}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "id": 3,
+      "options": {"barWidth": 0.97, "groupWidth": 0.7, "legend": {"displayMode": "list"}, "tooltip": {"mode": "single"}},
+      "targets": [{"datasource": {"type": "prometheus"}, "expr": "groceror_users_events_total", "legendFormat": "{{event_type}}", "refId": "A"}],
+      "title": "Events by Type",
+      "type": "barchart"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {}}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "id": 4,
+      "options": {"legend": {"displayMode": "list"}, "tooltip": {"mode": "single"}},
+      "targets": [{"datasource": {"type": "prometheus"}, "expr": "rate(groceror_users_processing_errors_total[5m])", "legendFormat": "{{event_type}}/{{reason}}", "refId": "A"}],
+      "title": "Error Rate",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": 0}, {"color": "green", "value": 1}]}}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 4},
+      "id": 5,
+      "options": {"colorMode": "background", "graphMode": "none", "reduceOptions": {"calcs": ["lastNotNull"]}},
+      "targets": [{"datasource": {"type": "prometheus"}, "expr": "groceror_users_consumer_up", "legendFormat": "Consumer", "refId": "A"}],
+      "title": "Consumer Status",
+      "type": "stat"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "tags": ["groceror", "users"],
+  "time": {"from": "now-1h", "to": "now"},
+  "timezone": "browser",
+  "title": "groceror-users",
+  "uid": "groceror-users",
+  "version": 1
+}
