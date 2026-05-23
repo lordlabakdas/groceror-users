@@ -15,7 +15,7 @@ services:
       API_HOST: 0.0.0.0
       API_PORT: 8002
       METRICS_BACKEND: prometheus
-      PUSHGATEWAY_URL: ${PUSHGATEWAY_URL:-http://localhost:9091}
+      PUSHGATEWAY_URL: ${PUSHGATEWAY_URL:-}
     depends_on:
       - mongodb
     extra_hosts:
