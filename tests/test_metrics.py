@@ -32,9 +32,20 @@ def test_set_consumer_status_down():
 
 
 def test_pushgateway_push_called_when_backend_is_pushgateway():
-    with patch.object(metrics_module, "_push_if_needed") as mock_push:
-        metrics_module.increment_event("otp_verified")
+    with patch("metrics.push_to_gateway") as mock_push, \
+         patch("metrics.config") as mock_config:
+        mock_config.METRICS_BACKEND = "pushgateway"
+        mock_config.PUSHGATEWAY_URL = "http://localhost:9091"
+        metrics_module._push_if_needed()
         mock_push.assert_called_once()
+
+
+def test_pushgateway_not_called_for_prometheus_backend():
+    with patch("metrics.push_to_gateway") as mock_push, \
+         patch("metrics.config") as mock_config:
+        mock_config.METRICS_BACKEND = "prometheus"
+        metrics_module._push_if_needed()
+        mock_push.assert_not_called()
 
 
 def test_pushgateway_failure_does_not_raise():

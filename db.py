@@ -21,7 +21,7 @@ class DB:
             "event": event_type,
             "schema_version": raw_payload.get("schema_version", "1.0"),
             "user_id": user_id,
-            "received_at": datetime.now(timezone.utc).isoformat(),
+            "received_at": datetime.now(timezone.utc),
             "raw_payload": raw_payload,
         }
         for field in _TOP_LEVEL_FIELDS:
