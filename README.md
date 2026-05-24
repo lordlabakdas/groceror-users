@@ -19,6 +19,56 @@ All events are stored in MongoDB (`users` database, `user_events` collection) an
 
 ---
 
+## Running alongside groceror
+
+groceror runs as a bare Python process (`make run`) and expects RabbitMQ on `localhost:5672`. groceror-users runs in Docker Compose and connects to that same broker via `host.docker.internal`.
+
+**1. Start RabbitMQ on your host** (if not already running):
+
+```bash
+# macOS
+brew services start rabbitmq
+
+# Linux
+sudo systemctl start rabbitmq-server
+
+# or via Docker (standalone)
+docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+```
+
+**2. Start groceror:**
+
+```bash
+cd /path/to/groceror
+make run   # starts on localhost:8000
+```
+
+**3. Start groceror-users:**
+
+```bash
+docker compose up --build
+```
+
+The compose stack defaults `RABBITMQ_HOST=host.docker.internal`, which routes from inside the container to RabbitMQ on your host — no extra config needed.
+
+**Verify it's working:**
+
+Trigger any user event on groceror (`POST /user/register`, `POST /user/verify-otp`, `POST /user/set-profile`, `PUT /user/change-password`), then check:
+
+```bash
+# event landed in MongoDB
+mongosh mongodb://localhost:27018/users --eval "db.user_events.find().pretty()"
+
+# metric incremented
+curl -s localhost:8002/metrics | grep groceror_users_events_total
+```
+
+Open Grafana at http://localhost:3001 (admin / admin) — the **User Events** dashboard shows activity in real time.
+
+**RabbitMQ management UI** (if using the `rabbitmq:3-management` image) is at http://localhost:15672 (guest / guest). `user_events_queue` and `user_events_queue.dlq` appear once groceror-users starts.
+
+---
+
 ## Running with Docker Compose
 
 The compose stack includes groceror-users, MongoDB, Prometheus, and Grafana.
