@@ -78,3 +78,38 @@ def test_process_message_db_failure_raises_and_increments_error(mock_db):
         with pytest.raises(Exception, match="mongo down"):
             process_message(RAW_REGISTERED, mock_db)
     mock_err.assert_called_once_with("user_registered", "db")
+
+
+def test_process_message_updates_user_state(mock_db):
+    with patch("handler.increment_event"), patch("handler.increment_error"):
+        process_message(RAW_REGISTERED, mock_db)
+    user = mock_db.db["users"].find_one({"user_id": "uid-1"})
+    assert user is not None
+    assert user["status"] == "registered"
+    assert user["phone"] == "+1"
+
+
+def test_process_message_full_user_lifecycle(mock_db):
+    with patch("handler.increment_event"), patch("handler.increment_error"):
+        process_message(RAW_REGISTERED, mock_db)
+        process_message(RAW_OTP, mock_db)
+        process_message(RAW_PROFILE, mock_db)
+        process_message(RAW_PASSWORD, mock_db)
+
+    assert mock_db.db["users"].count_documents({}) == 4
+
+    user3 = mock_db.db["users"].find_one({"user_id": "uid-3"})
+    assert user3["status"] == "active"
+    assert user3["name"] == "Bob"
+    assert user3["email"] == "bob@x.com"
+
+    user4 = mock_db.db["users"].find_one({"user_id": "uid-4"})
+    assert "password_changed_at" in user4
+
+
+def test_process_message_upsert_failure_raises_and_increments_error(mock_db):
+    with patch.object(mock_db, "upsert_user_state", side_effect=Exception("mongo down")), \
+         patch("handler.increment_error") as mock_err:
+        with pytest.raises(Exception, match="mongo down"):
+            process_message(RAW_REGISTERED, mock_db)
+    mock_err.assert_called_once_with("user_registered", "db")

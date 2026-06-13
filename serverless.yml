@@ -1,0 +1,43 @@
+service: groceror-users
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'prod'}
+  environment:
+    MONGO_URI: ${ssm:/groceror/${self:provider.stage}/MONGO_URI}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+            - sqs:GetQueueAttributes
+          Resource:
+            - ${cf:groceror-infra-${self:provider.stage}.UserEventsQueueArn}
+
+functions:
+  consumer:
+    handler: lambda_handler.handler
+    timeout: 60
+    memorySize: 256
+    events:
+      - sqs:
+          arn: ${cf:groceror-infra-${self:provider.stage}.UserEventsQueueArn}
+          batchSize: 10
+          functionResponseType: ReportBatchItemFailures
+
+package:
+  patterns:
+    - "!consumer.py"
+    - "!main.py"
+    - "!tests/**"
+    - "!grafana/**"
+    - "!prometheus.yml"
+    - "!docker-compose.yml"
+    - "!Dockerfile"
+    - "!requirements-dev.txt"
+    - "!README.md"
