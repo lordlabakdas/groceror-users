@@ -33,6 +33,7 @@ def process_message(raw: dict, db: DB) -> None:
 
     try:
         db.insert_event(event_type, user_id, raw)
+        db.upsert_user_state(event_type, user_id, parsed)
     except Exception:
         increment_error(event_type, "db")
         raise
