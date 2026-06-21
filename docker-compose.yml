@@ -11,7 +11,7 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
-      MONGO_URI: mongodb://mongodb:27017
+      MONGO_URI: ${MONGO_URI:-mongodb://mongodb:27017}
       API_HOST: 0.0.0.0
       API_PORT: 8002
       METRICS_BACKEND: prometheus
