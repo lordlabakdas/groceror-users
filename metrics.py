@@ -32,8 +32,8 @@ def increment_error(event_type: str, reason: str) -> None:
     _push_if_needed()
 
 
-def set_consumer_status(up: bool) -> None:
-    consumer_up.set(1 if up else 0)
+def set_consumer_up(val: int) -> None:
+    consumer_up.set(val)
     _push_if_needed()
 
 

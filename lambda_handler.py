@@ -3,7 +3,7 @@ import json
 import logging
 
 from db import DB
-from handler import process_message
+from validator import parse_event
 
 log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -33,8 +33,9 @@ def handler(event: dict, context) -> dict:
             for msg in messages:
                 total += 1
                 try:
-                    body = base64.b64decode(msg["data"]).decode("utf-8")
-                    process_message(json.loads(body), db)
+                    raw = json.loads(base64.b64decode(msg["data"]).decode("utf-8"))
+                    parsed = parse_event(raw)
+                    db.insert_event(parsed.event, str(getattr(parsed, "user_id", "")), raw)
                 except Exception as exc:
                     log.error("Failed to process Amazon MQ message: %s", exc)
                     failed += 1
@@ -43,7 +44,9 @@ def handler(event: dict, context) -> dict:
         total = len(event["Records"])
         for record in event["Records"]:
             try:
-                process_message(json.loads(record["body"]), db)
+                raw = json.loads(record["body"])
+                parsed = parse_event(raw)
+                db.insert_event(parsed.event, str(getattr(parsed, "user_id", "")), raw)
             except Exception as exc:
                 log.error("Failed to process SQS record: %s", exc)
                 failed += 1
