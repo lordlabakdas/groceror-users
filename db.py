@@ -82,5 +82,8 @@ class DB:
             event_type, user_id, result.upserted_id is not None,
         )
 
+    def get_collection(self, name: str):
+        return self.db[name]
+
     def close(self) -> None:
         self.client.close()
